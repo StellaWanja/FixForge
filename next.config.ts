@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
 
 // Make sure adding Sentry options is the last code to run before exporting
 export default withSentryConfig(nextConfig, {
-  org: "stella-0c",
+  org: process.env.ORG,
   project: "fix-forge",
   authToken: process.env.SENTRY_AUTH_TOKEN,
 

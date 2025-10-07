@@ -1,5 +1,5 @@
 //  preserve state, remain interactive, and do not rerender.
-import Header from "@/components/Header/Header";
+import Header from "@/components/layout/Header/Header";
 import React from "react";
 
 export default async function Layout({

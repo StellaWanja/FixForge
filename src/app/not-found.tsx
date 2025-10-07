@@ -9,7 +9,7 @@ import React from "react";
 
 function NotFound() {
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center bg-[url('/images/home-bg.jpg')] bg-cover bg-no-repeat bg-center p-8 relative">
+    <section className="min-h-screen w-full flex flex-col justify-center bg-[url('/images/home-bg.jpg')] bg-cover bg-no-repeat bg-center p-8 relative">
       <div className="absolute inset-0 bg-black/70"></div>
       <div className="relative z-10 text-center space-y-6 p-8">
         <div className="space-y-2">
@@ -27,7 +27,7 @@ function NotFound() {
           Return Home
         </Link>
       </div>
-    </div>
+    </section>
   );
 }
 

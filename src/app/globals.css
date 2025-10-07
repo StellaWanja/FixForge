@@ -141,3 +141,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .hover-color:hover {
+    @apply text-gray-300 transition-colors duration-150 ease-in-out;
+  }
+}

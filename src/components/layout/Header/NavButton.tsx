@@ -7,9 +7,10 @@ type Props = {
   icon: LucideIcon;
   label: string;
   href?: string;
+  styles?: string;
 };
 
-function NavButton({ icon: Icon, label, href }: Props) {
+function NavButton({ icon: Icon, label, href, styles }: Props) {
   return (
     <Button
       variant={"ghost"}
@@ -17,7 +18,7 @@ function NavButton({ icon: Icon, label, href }: Props) {
       aria-label={label}
       title={label}
       asChild
-      className="rounded-full"
+      className={`${styles} rounded-full`}
     >
       {href ? (
         <Link href={href}>

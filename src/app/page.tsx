@@ -1,3 +1,4 @@
+import Header from "@/components/layout/Header/Header";
 import {
   Monitor,
   Smartphone,
@@ -12,10 +13,11 @@ import {
 export default function Home() {
   return (
     <div className="min-h-screen w-full flex flex-col bg-[url('/images/home-bg.jpg')] bg-cover bg-center bg-no-repeat p-8">
+      <Header />
+
       <main className="flex-1 flex flex-col items-center justify-center text-white ">
         <div className="text-center">
-          <h1 className="text-6xl font-bold ">Fix Forge</h1>
-          <h3 className="text-3xl mt-4">Experts You Can Trust</h3>
+          <h1 className="text-5xl font-bold">Experts You Can Trust</h1>
           <p className="text-xl mt-8">Fast • Reliable • Affordable</p>
         </div>
 

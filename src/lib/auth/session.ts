@@ -3,7 +3,6 @@
 import { cookies } from "next/headers";
 import z from "zod";
 import crypto from "crypto";
-import { User } from "@/models/user";
 import { userRoles } from "@/lib/db/schema";
 import { redis } from "@/lib/redis/redis";
 
@@ -32,26 +31,23 @@ export async function createUserSession(user: UserSession) {
   });
 }
 
-// Set session cookie
-export const setSessionCookie = async (user: User) => {
-  (await cookies()).set(COOKIE_SESSION_KEY, JSON.stringify(user), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: SESSION_EXPIRATION_SECONDS,
-    path: "/",
-  });
-};
+export async function getUserFromSession() {
+  const sessionId = (await cookies()).get(COOKIE_SESSION_KEY)?.value;
+  if (!sessionId) return null;
+  return getUserSessionById(sessionId);
+}
 
-// get session cookie
-export const getSessionCookie = async (): Promise<User | null> => {
-  const session = (await cookies()).get(COOKIE_SESSION_KEY)?.value;
-  if (!session) return null;
-  const user = JSON.parse(session) as User;
-  return user;
-};
+async function getUserSessionById(sessionId: string) {
+  const user = await redis.get(`session:${sessionId}`);
+  const { success, data } = sessionSchema.safeParse(user);
+  return success ? data : null;
+}
 
-// delete session cookie
-export const deleteSessionCookie = async () => {
-  const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_SESSION_KEY);
-};
+export async function removeUserSession() {
+  const sessionId = (await cookies()).get(COOKIE_SESSION_KEY)?.value;
+  if (!sessionId) return null;
+
+  await redis.del(`session:${sessionId}`);
+  (await cookies()).delete(COOKIE_SESSION_KEY);
+}
+

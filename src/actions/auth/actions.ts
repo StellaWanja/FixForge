@@ -5,11 +5,41 @@ import { eq } from "drizzle-orm";
 import { signInSchema, signUpSchema } from "./authSchemas";
 import { UserTable } from "@/lib/db/schemas/userSchema";
 import { db } from "@/lib/db";
-import { generateSalt, hashPassword } from "@/lib/auth/hashPassword";
-import { createUserSession } from "@/lib/auth/session";
+import {
+  comparePasswords,
+  generateSalt,
+  hashPassword,
+} from "@/lib/auth/hashPassword";
+import { createUserSession, removeUserSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
-export async function signIn(unsafeData: z.infer<typeof signInSchema>) {}
+export async function signIn(unsafeData: z.infer<typeof signInSchema>) {
+  const { success, data } = signInSchema.safeParse(unsafeData);
+
+  if (!success) return "Unable to sign in";
+
+  const user = await db.query.UserTable.findFirst({
+    columns: { password: true, salt: true, id: true, role: true, email: true },
+    where: eq(UserTable.email, data.email),
+  });
+
+  if (!user || user.password === null || user.salt === null) {
+    return "Unable to sign in";
+  }
+
+  const isCorrectPassword = await comparePasswords({
+    hashedPassword: user.password,
+    password: data.password,
+    salt: user.salt,
+  });
+
+  if (!isCorrectPassword) return "Unable to sign in";
+
+  await createUserSession(user);
+
+  redirect("/home");
+}
 
 // Verify data, hash password -> save user to DB -> create user session -> save session to Redis -> save session cookie
 export async function signUp(unsafeData: z.infer<typeof signUpSchema>) {
@@ -44,4 +74,10 @@ export async function signUp(unsafeData: z.infer<typeof signUpSchema>) {
   }
 
   redirect("/home");
+}
+
+
+export async function signOut() {
+  await removeUserSession();
+  redirect("/");
 }

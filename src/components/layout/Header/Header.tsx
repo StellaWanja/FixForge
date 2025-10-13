@@ -4,10 +4,12 @@ import { HomeIcon, Ticket, Users } from "lucide-react";
 import Link from "next/link";
 import { ModeToggle } from "@/components/ModeToggle";
 import LogoutButton from "./LogoutButton";
+import { getUserFromSession } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/currentUser";
 
-function Header() {
+async function Header() {
   // SET UP HEADER BASED ON LOGIN DETAILS
-  const session = false;
+  const session = await getCurrentUser({ withFullUser: true });
 
   return (
     <header className="h-12 p-2 border-b-2 sticky top-0 z-20">

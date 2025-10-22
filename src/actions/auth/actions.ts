@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { signInSchema, signUpSchema } from "./authSchemas";
-import { UserTable } from "@/lib/db/schemas/userSchema";
+import { OAuthProvider, UserTable } from "@/lib/db/schemas/userSchema";
 import { db } from "@/lib/db";
 import {
   comparePasswords,
@@ -12,7 +12,7 @@ import {
 } from "@/lib/auth/hashPassword";
 import { createUserSession, removeUserSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { getOAuthClient } from "@/lib/auth/oauth/base";
 
 export async function signIn(unsafeData: z.infer<typeof signInSchema>) {
   const { success, data } = signInSchema.safeParse(unsafeData);
@@ -38,7 +38,7 @@ export async function signIn(unsafeData: z.infer<typeof signInSchema>) {
 
   await createUserSession(user);
 
-  redirect("/home");
+  redirect("/dashboard");
 }
 
 // Verify data, hash password -> save user to DB -> create user session -> save session to Redis -> save session cookie
@@ -73,11 +73,15 @@ export async function signUp(unsafeData: z.infer<typeof signUpSchema>) {
     return "Unable to create account";
   }
 
-  redirect("/home");
+  redirect("/dashboard");
 }
-
 
 export async function signOut() {
   await removeUserSession();
   redirect("/");
+}
+
+export async function oAuthSignUp(provider: OAuthProvider) {
+  const oAuthClient = getOAuthClient(provider);
+  redirect(await oAuthClient.createAuthURL());
 }

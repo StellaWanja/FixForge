@@ -1,37 +1,14 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { User, Mail, Lock } from "lucide-react";
-import FormInput from "@/components/features/auth/FormInput";
-import { SubmitHandler, useForm } from "react-hook-form";
-import z from "zod";
-import { signUpSchema } from "@/actions/auth/authSchemas";
-import { signUp } from "@/actions/auth/actions";
-import { Button } from "@/components/ui/button";
+import RegisterForm from "./RegisterForm";
+import OAuthButtons from "../OAuthButtons";
 
-function Register() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [formError, setFormError] = useState<string | null>();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<z.infer<typeof signUpSchema>>({
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit: SubmitHandler<z.infer<typeof signUpSchema>> = async (
-    data: z.infer<typeof signUpSchema>
-  ) => {
-    const error = await signUp(data);
-    setFormError(error);
-  };
+export default async function Register({
+  searchParams,
+}: {
+  searchParams: Promise<{ oauthError?: string }>;
+}) {
+  const { oauthError } = await searchParams;
 
   return (
     <main className="min-h-screen w-full flex items-center justify-center bg-[url('/images/home-bg.jpg')] bg-cover bg-no-repeat bg-center p-8 relative">
@@ -45,76 +22,26 @@ function Register() {
             <p className="text-white/80">Join us to get started</p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* error message */}
-            {formError && <p className="mt-1 text-sm text-destructive">{formError}</p>}
+          <div className="flex flex-col gap-4">
+            {oauthError && (
+              <p className="text-destructive text-center">{oauthError}</p>
+            )}
+            <OAuthButtons />
+          </div>
 
-            <FormInput
-              label="Full Name"
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              icon={User}
-              {...register("name", {
-                required: "Full Name is required",
-                setValueAs: (v) => v.trim(),
-              })}
-              error={errors.name}
-            />
+          {/* Divider */}
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/20"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white/10 text-white/80">
+                Or continue with email
+              </span>
+            </div>
+          </div>
 
-            <FormInput
-              label="Email Address"
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              icon={Mail}
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /\S+@\S+\.\S+/,
-                  message: "Please enter a valid email address",
-                },
-                setValueAs: (v) => v.trim(),
-              })}
-              error={errors.email}
-            />
-
-            <FormInput
-              label="Password"
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              icon={Lock}
-              toggleVisibility={() => {
-                setShowPassword((prev) => !prev);
-              }}
-              showPassword={showPassword}
-              {...register("password", {
-                required: "Password is required",
-                pattern: {
-                  value:
-                    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
-                  message:
-                    "Password must contain at least 1 lowercase letter, 1 uppercase letter, 1 number, and 1 special character",
-                },
-                minLength: {
-                  value: 8,
-                  message: "Password must be at least 8 characters",
-                },
-                setValueAs: (v) => v.trim(),
-              })}
-              error={errors.password}
-            />
-
-            
-
-            <Button
-              type="submit"
-              className="w-full bg-white backdrop-blur-sm border border-white/30 text-md font-bold cursor-pointer transition-all duration-300"
-            >
-              Create Account
-            </Button>
-          </form>
+          <RegisterForm />
 
           <div className="mt-6 text-center space-y-2">
             <p className="text-white/80 text-sm">
@@ -138,5 +65,3 @@ function Register() {
     </main>
   );
 }
-
-export default Register;

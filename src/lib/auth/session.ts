@@ -31,6 +31,34 @@ export async function createUserSession(user: UserSession) {
   });
 }
 
+export async function updateUserSession(user: UserSession) {
+  const sessionId = (await cookies()).get(COOKIE_SESSION_KEY)?.value;
+  if (!sessionId) return null;
+
+  await redis.set(`session:${sessionId}`, sessionSchema.parse(user), {
+    ex: SESSION_EXPIRATION_SECONDS,
+  });
+}
+
+export async function updateUserSessionExpiration() {
+  const sessionId = (await cookies()).get(COOKIE_SESSION_KEY)?.value;
+  if (!sessionId) return null;
+
+  const user = await getUserSessionById(sessionId);
+  if (!user) return null;
+
+  await redis.set(`session:${sessionId}`, sessionSchema.parse(user), {
+    ex: SESSION_EXPIRATION_SECONDS,
+  });
+
+  (await cookies()).set(COOKIE_SESSION_KEY, sessionId, {
+    httpOnly: true, //only accessible on server
+    secure: true,
+    sameSite: "lax",
+    expires: new Date(Date.now() + SESSION_EXPIRATION_SECONDS * 1000),
+  });
+}
+
 export async function getUserFromSession() {
   const sessionId = (await cookies()).get(COOKIE_SESSION_KEY)?.value;
   if (!sessionId) return null;
@@ -50,4 +78,3 @@ export async function removeUserSession() {
   await redis.del(`session:${sessionId}`);
   (await cookies()).delete(COOKIE_SESSION_KEY);
 }
-

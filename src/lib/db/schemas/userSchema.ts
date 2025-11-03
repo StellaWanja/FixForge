@@ -1,6 +1,5 @@
 import {
   pgEnum,
-  PgTable,
   pgTable,
   primaryKey,
   text,
